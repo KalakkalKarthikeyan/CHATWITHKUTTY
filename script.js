@@ -49,3 +49,4 @@ function sendMessage() {
     chatbox.scrollTop = chatbox.scrollHeight;
 }
 
+
