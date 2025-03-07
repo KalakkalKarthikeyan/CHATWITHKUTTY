@@ -1,3 +1,11 @@
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("userInput").addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    });
+});
+
 function getUnknownReply() {
     let replies = [
         "Hmm... I'm not sure about that, but I can learn!",
@@ -32,9 +40,10 @@ function getEditDistance(a, b) {
 
 // AI-Like Matching System: Combines Word Matching & Fuzzy Matching
 function findBestMatch(userInput, responseSet) {
-    let cleanedInput = userInput.replace(/[^\w\s]/gi, "").toLowerCase(); // Remove punctuation
-    let words = cleanedInput.split(" "); // Split into words
+    let cleanedInput = userInput.replace(/[^\w\s]/gi, "").toLowerCase().trim(); // Remove punctuation & extra spaces
+    if (cleanedInput.length === 0) return null; // Prevent empty messages
 
+    let words = cleanedInput.split(" "); // Split into words
     let bestMatch = null;
     let highestMatchCount = 0;
     let lowestDistance = Infinity;
@@ -60,15 +69,16 @@ function findBestMatch(userInput, responseSet) {
         }
     }
 
-    // If strong match found, return it
     return bestMatch || null;
 }
 
 function sendMessage() {
-    let userInput = document.getElementById("userInput").value.toLowerCase();
+    let inputElement = document.getElementById("userInput");
+    let userInput = inputElement.value.trim();
     let chatbox = document.getElementById("chatbox");
 
-    // Try finding a match in multiple response sets
+    if (userInput === "") return; // Prevent empty messages
+
     let response = findBestMatch(userInput, responses) || 
                    findBestMatch(userInput, extraResponses) || 
                    getUnknownReply();
@@ -76,7 +86,8 @@ function sendMessage() {
     chatbox.innerHTML += `<p><b>You:</b> ${userInput}</p>`;
     chatbox.innerHTML += `<p><b>Kutty:</b> ${response}</p>`;
 
-    document.getElementById("userInput").value = "";
-    chatbox.scrollTop = chatbox.scrollHeight;
+    inputElement.value = ""; // Clear input
+    chatbox.scrollTop = chatbox.scrollHeight; // Auto-scroll down
 }
+
 
