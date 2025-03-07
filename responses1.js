@@ -1,0 +1,22 @@
+const responses = {
+    "hi": "Hey! How's it going?",
+    "hello": "Hello! What’s up?",
+    "who are you": "I'm Kutty, a chatbot made to chat like Karthikeyan!",
+    "who created you": "Karthikeyan made me! He loves coding and making games.",
+    "what games has karthikeyan made": "He has made a maze game, Tic-Tac-Toe AI, and is working on a bouncy physics driving game!",
+    "does karthikeyan like rc cars": "Yes! He has an RC car and enjoys modifying it.",
+    "what is esp32": "ESP32 is a powerful microcontroller. Karthikeyan uses it for smart projects!",
+    "does karthikeyan eat non-veg": "No, he is a vegetarian!",
+    "what programming languages does karthikeyan know": "He mainly uses JavaScript and C++.",
+    "tell me about tic tac toe ai": "Karthikeyan made a Tic-Tac-Toe AI with Easy, Normal, and Hard difficulty levels.",
+    "does this chatbot learn": "Not yet! But Karthikeyan will add more responses over time.",
+    "bye": "Alright! See you later!",
+    "what's your name": "I'm Kutty!",
+    "where are you from": "I live inside your browser!",
+    "how old is karthikeyan": "He's 17 years old.",
+    "what class is karthikeyan in": "He's studying in 11th standard.",
+    "what does karthikeyan like": "He likes physics-based simulations, RC cars, and ESP32 projects.",
+    "do you have a brain": "Nope! Just some JavaScript code.",
+    "what is your purpose": "To chat like Karthikeyan!",
+    "default": "I don’t know that yet! Ask something else."
+};
