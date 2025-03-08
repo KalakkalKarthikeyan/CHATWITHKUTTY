@@ -23,8 +23,8 @@
                 position: absolute; right: 50px;
                 background-color: red; visibility: hidden;">
             </span>
-            <button type="button" onclick="sendMessage()">Send</button>
-            <button type="button" id="voiceInput">🎤</button>
+            <button id="sendButton">Send</button> <!-- ✅ FIXED: Added missing ID -->
+            <button id="voiceInput">🎤</button>
         </div>
 
         <!-- Typing Indicator -->
@@ -38,7 +38,7 @@
             position: absolute; width: 250px;
             background: white; border: 1px solid gray;
             display: none; max-height: 150px; overflow-y: auto;
-            z-index: 10; left: 10px;">
+            z-index: 10;">
         </div>
     </div>
 
@@ -52,8 +52,8 @@
     <script src="responses8.js"></script>
     <script src="responses9.js"></script>
     <script src="responses10.js"></script>
-    <script src="functions.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
+
 
