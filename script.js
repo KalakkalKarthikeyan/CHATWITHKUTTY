@@ -3,9 +3,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let indicator = document.getElementById("statusIndicator");
     let suggestionsBox = document.getElementById("suggestions");
 
-    // Debugging: Check if responses are loaded
-    console.log("Checking responses:", typeof responses, typeof extraResponses);
-
     // Enter key to send message
     inputElement.addEventListener("keypress", function (event) {
         if (event.key === "Enter") {
@@ -30,9 +27,13 @@ function updateStatusIndicator(userInput) {
         return;
     }
 
-    let response = findBestMatch(userInput, responses) || findBestMatch(userInput, extraResponses);
-    console.log("Checking response for input:", userInput, "Found:", response);
+    // Ensure responses exist before checking them
+    if (typeof responses === "undefined" || typeof extraResponses === "undefined") {
+        indicator.style.visibility = "hidden";
+        return;
+    }
 
+    let response = findBestMatch(userInput, responses) || findBestMatch(userInput, extraResponses);
     indicator.style.visibility = "visible";
     indicator.style.backgroundColor = response ? "green" : "red";
 }
@@ -42,13 +43,13 @@ function showSuggestions(userInput) {
     let suggestionsBox = document.getElementById("suggestions");
     suggestionsBox.innerHTML = "";
 
-    if (userInput.length === 0) {
-        suggestionsBox.style.display = "none"; // Hide if input is empty
+    if (userInput.length === 0 || typeof responses === "undefined" || typeof extraResponses === "undefined") {
+        suggestionsBox.style.display = "none"; // Hide suggestions if input is empty or responses are missing
         return;
     }
 
-    let matchedQuestions = Object.keys(responses || {})
-        .concat(Object.keys(extraResponses || {}))
+    let matchedQuestions = Object.keys(responses)
+        .concat(Object.keys(extraResponses))
         .filter(question => question.toLowerCase().includes(userInput.toLowerCase()))
         .slice(0, 5); // Limit to 5 suggestions
 
@@ -58,9 +59,8 @@ function showSuggestions(userInput) {
     }
 
     matchedQuestions.forEach(question => {
-        let boldedPart = question.replace(new RegExp(`^(${userInput})`, "i"), "<b>$1</b>");
         let suggestionItem = document.createElement("div");
-        suggestionItem.innerHTML = boldedPart;
+        suggestionItem.innerHTML = `<strong>${question}</strong>`;
         suggestionItem.classList.add("suggestion-item");
 
         suggestionItem.addEventListener("click", function () {
@@ -86,9 +86,31 @@ function getUnknownReply() {
     return replies[Math.floor(Math.random() * replies.length)];
 }
 
+// Function to calculate Levenshtein Distance (edit distance for fuzzy matching)
+function getEditDistance(a, b) {
+    if (!a || !b) return Infinity; // Prevent errors if input is undefined
+    let tmp;
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+    if (a.length > b.length) tmp = a, a = b, b = tmp;
+
+    let row = Array(a.length + 1).fill().map((_, i) => i);
+
+    for (let i = 1; i <= b.length; i++) {
+        let prev = i;
+        for (let j = 1; j <= a.length; j++) {
+            let val = (b[i - 1] === a[j - 1]) ? row[j - 1] : Math.min(row[j - 1] + 1, prev + 1, row[j] + 1);
+            row[j - 1] = prev;
+            prev = val;
+        }
+        row[a.length] = prev;
+    }
+    return row[a.length];
+}
+
 // AI-Like Matching System: Combines Word Matching & Fuzzy Matching
 function findBestMatch(userInput, responseSet) {
-    if (!responseSet) return null; // Prevent errors if undefined
+    if (typeof responseSet !== "object") return null; // Prevents errors if responseSet is undefined
 
     let cleanedInput = userInput.replace(/[^\w\s]/gi, "").toLowerCase().trim();
     if (cleanedInput.length === 0) return null;
@@ -127,7 +149,11 @@ function sendMessage() {
 
     if (userInput === "") return;
 
-    console.log("Send button clicked! Input:", userInput);
+    // Ensure responses exist before using them
+    if (typeof responses === "undefined" || typeof extraResponses === "undefined") {
+        alert("Error: Responses are not loaded.");
+        return;
+    }
 
     let response = findBestMatch(userInput, responses) || 
                    findBestMatch(userInput, extraResponses) || 
@@ -140,4 +166,3 @@ function sendMessage() {
     document.getElementById("suggestions").style.display = "none"; // Hide suggestions after sending
     chatbox.scrollTop = chatbox.scrollHeight;
 }
-
