@@ -1,11 +1,75 @@
 document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("userInput").addEventListener("keypress", function (event) {
+    let inputElement = document.getElementById("userInput");
+    let indicator = document.getElementById("statusIndicator");
+    let suggestionsBox = document.getElementById("suggestions");
+
+    // Enter key to send message
+    inputElement.addEventListener("keypress", function (event) {
         if (event.key === "Enter") {
             sendMessage();
         }
     });
+
+    // Check answer availability & show suggestions while typing
+    inputElement.addEventListener("input", function () {
+        let userInput = inputElement.value.trim();
+        updateStatusIndicator(userInput);
+        showSuggestions(userInput);
+    });
 });
 
+// Function to check answer availability & update dot color
+function updateStatusIndicator(userInput) {
+    let indicator = document.getElementById("statusIndicator");
+
+    if (userInput.length === 0) {
+        indicator.style.visibility = "hidden"; // Hide if empty
+        return;
+    }
+
+    let response = findBestMatch(userInput, responses) || findBestMatch(userInput, extraResponses);
+    indicator.style.visibility = "visible";
+    indicator.style.backgroundColor = response ? "green" : "red";
+}
+
+// Function to show Google-like suggestions
+function showSuggestions(userInput) {
+    let suggestionsBox = document.getElementById("suggestions");
+    suggestionsBox.innerHTML = "";
+
+    if (userInput.length === 0) {
+        suggestionsBox.style.display = "none"; // Hide suggestions if input is empty
+        return;
+    }
+
+    let matchedQuestions = Object.keys(responses)
+        .concat(Object.keys(extraResponses))
+        .filter(question => question.toLowerCase().includes(userInput.toLowerCase()))
+        .slice(0, 5); // Limit to 5 suggestions
+
+    if (matchedQuestions.length === 0) {
+        suggestionsBox.style.display = "none";
+        return;
+    }
+
+    matchedQuestions.forEach(question => {
+        let boldedPart = question.replace(new RegExp(`^(${userInput})`, "i"), "<b>$1</b>");
+        let suggestionItem = document.createElement("div");
+        suggestionItem.innerHTML = boldedPart;
+        suggestionItem.classList.add("suggestion-item");
+
+        suggestionItem.addEventListener("click", function () {
+            document.getElementById("userInput").value = question; // Autofill input box
+            sendMessage(); // Send immediately
+        });
+
+        suggestionsBox.appendChild(suggestionItem);
+    });
+
+    suggestionsBox.style.display = "block";
+}
+
+// Function to get a default unknown reply
 function getUnknownReply() {
     let replies = [
         "Hmm... I'm not sure about that, but I can learn!",
@@ -17,7 +81,7 @@ function getUnknownReply() {
     return replies[Math.floor(Math.random() * replies.length)];
 }
 
-// Function to calculate Levenshtein Distance (edit distance)
+// Function to calculate Levenshtein Distance (edit distance for fuzzy matching)
 function getEditDistance(a, b) {
     let tmp;
     if (a.length === 0) return b.length;
@@ -40,10 +104,10 @@ function getEditDistance(a, b) {
 
 // AI-Like Matching System: Combines Word Matching & Fuzzy Matching
 function findBestMatch(userInput, responseSet) {
-    let cleanedInput = userInput.replace(/[^\w\s]/gi, "").toLowerCase().trim(); // Remove punctuation & extra spaces
-    if (cleanedInput.length === 0) return null; // Prevent empty messages
+    let cleanedInput = userInput.replace(/[^\w\s]/gi, "").toLowerCase().trim();
+    if (cleanedInput.length === 0) return null;
 
-    let words = cleanedInput.split(" "); // Split into words
+    let words = cleanedInput.split(" ");
     let bestMatch = null;
     let highestMatchCount = 0;
     let lowestDistance = Infinity;
@@ -52,16 +116,13 @@ function findBestMatch(userInput, responseSet) {
         let cleanedKey = key.replace(/[^\w\s]/gi, "").toLowerCase();
         let keyWords = cleanedKey.split(" ");
 
-        // Count how many words match
         let matchCount = words.filter(word => keyWords.includes(word)).length;
 
-        // If more than half of the words match, consider it a strong match
         if (matchCount > highestMatchCount) {
             highestMatchCount = matchCount;
             bestMatch = responseSet[key];
         }
 
-        // Fuzzy Matching: Find the closest match even with spelling mistakes
         let distance = getEditDistance(cleanedInput, cleanedKey);
         if (distance < Math.ceil(cleanedInput.length * 0.3) && distance < lowestDistance) {
             lowestDistance = distance;
@@ -72,12 +133,13 @@ function findBestMatch(userInput, responseSet) {
     return bestMatch || null;
 }
 
+// Function to send a message
 function sendMessage() {
     let inputElement = document.getElementById("userInput");
     let userInput = inputElement.value.trim();
     let chatbox = document.getElementById("chatbox");
 
-    if (userInput === "") return; // Prevent empty messages
+    if (userInput === "") return;
 
     let response = findBestMatch(userInput, responses) || 
                    findBestMatch(userInput, extraResponses) || 
@@ -86,8 +148,10 @@ function sendMessage() {
     chatbox.innerHTML += `<p><b>You:</b> ${userInput}</p>`;
     chatbox.innerHTML += `<p><b>Kutty:</b> ${response}</p>`;
 
-    inputElement.value = ""; // Clear input
-    chatbox.scrollTop = chatbox.scrollHeight; // Auto-scroll down
+    inputElement.value = "";
+    document.getElementById("suggestions").style.display = "none"; // Hide suggestions after sending
+    chatbox.scrollTop = chatbox.scrollHeight;
 }
+
 
 
