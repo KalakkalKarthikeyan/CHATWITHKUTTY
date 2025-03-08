@@ -3,6 +3,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let indicator = document.getElementById("statusIndicator");
     let suggestionsBox = document.getElementById("suggestions");
 
+    // Debugging: Check if responses are loaded
+    console.log("Checking responses:", typeof responses, typeof extraResponses);
+
     // Enter key to send message
     inputElement.addEventListener("keypress", function (event) {
         if (event.key === "Enter") {
@@ -27,7 +30,9 @@ function updateStatusIndicator(userInput) {
         return;
     }
 
-    let response = findBestMatch(userInput) || findBestMatch(userInput, extraResponses);
+    let response = findBestMatch(userInput, responses) || findBestMatch(userInput, extraResponses);
+    console.log("Checking response for input:", userInput, "Found:", response);
+
     indicator.style.visibility = "visible";
     indicator.style.backgroundColor = response ? "green" : "red";
 }
@@ -38,12 +43,12 @@ function showSuggestions(userInput) {
     suggestionsBox.innerHTML = "";
 
     if (userInput.length === 0) {
-        suggestionsBox.style.display = "none"; // Hide suggestions if input is empty
+        suggestionsBox.style.display = "none"; // Hide if input is empty
         return;
     }
 
-    let matchedQuestions = Object.keys(getAllResponses())
-        .concat(Object.keys(extraResponses))
+    let matchedQuestions = Object.keys(responses || {})
+        .concat(Object.keys(extraResponses || {}))
         .filter(question => question.toLowerCase().includes(userInput.toLowerCase()))
         .slice(0, 5); // Limit to 5 suggestions
 
@@ -81,29 +86,10 @@ function getUnknownReply() {
     return replies[Math.floor(Math.random() * replies.length)];
 }
 
-// Function to calculate Levenshtein Distance (edit distance for fuzzy matching)
-function getEditDistance(a, b) {
-    let tmp;
-    if (a.length === 0) return b.length;
-    if (b.length === 0) return a.length;
-    if (a.length > b.length) tmp = a, a = b, b = tmp;
-
-    let row = Array(a.length + 1).fill().map((_, i) => i);
-
-    for (let i = 1; i <= b.length; i++) {
-        let prev = i;
-        for (let j = 1; j <= a.length; j++) {
-            let val = (b[i - 1] === a[j - 1]) ? row[j - 1] : Math.min(row[j - 1] + 1, prev + 1, row[j] + 1);
-            row[j - 1] = prev;
-            prev = val;
-        }
-        row[a.length] = prev;
-    }
-    return row[a.length];
-}
-
 // AI-Like Matching System: Combines Word Matching & Fuzzy Matching
-function findBestMatch(userInput, responseSet = getAllResponses()) {
+function findBestMatch(userInput, responseSet) {
+    if (!responseSet) return null; // Prevent errors if undefined
+
     let cleanedInput = userInput.replace(/[^\w\s]/gi, "").toLowerCase().trim();
     if (cleanedInput.length === 0) return null;
 
@@ -133,22 +119,6 @@ function findBestMatch(userInput, responseSet = getAllResponses()) {
     return bestMatch || null;
 }
 
-// Function to combine all response sets (responses1 - responses10)
-function getAllResponses() {
-    return {
-        ...responses1, 
-        ...responses2, 
-        ...responses3, 
-        ...responses4, 
-        ...responses5, 
-        ...responses6, 
-        ...responses7, 
-        ...responses8, 
-        ...responses9, 
-        ...responses10
-    };
-}
-
 // Function to send a message
 function sendMessage() {
     let inputElement = document.getElementById("userInput");
@@ -157,7 +127,9 @@ function sendMessage() {
 
     if (userInput === "") return;
 
-    let response = findBestMatch(userInput) || 
+    console.log("Send button clicked! Input:", userInput);
+
+    let response = findBestMatch(userInput, responses) || 
                    findBestMatch(userInput, extraResponses) || 
                    getUnknownReply();
 
@@ -168,3 +140,4 @@ function sendMessage() {
     document.getElementById("suggestions").style.display = "none"; // Hide suggestions after sending
     chatbox.scrollTop = chatbox.scrollHeight;
 }
+
