@@ -1,156 +1,122 @@
 document.addEventListener("DOMContentLoaded", function () {
-    let inputElement = document.getElementById("userInput");
-    let indicator = document.getElementById("statusIndicator");
-    let suggestionsBox = document.getElementById("suggestions");
-
-    // Enter key to send message
-    inputElement.addEventListener("keypress", function (event) {
-        if (event.key === "Enter") {
-            sendMessage();
-        }
-    });
-
-    // Check answer availability & show suggestions while typing
-    inputElement.addEventListener("input", function () {
-        let userInput = inputElement.value.trim();
-        updateStatusIndicator(userInput);
-        showSuggestions(userInput);
-    });
+    loadChatHistory(); // Load previous chat
+    detectUserName();  // Greet the user
 });
 
-// Function to check answer availability & update dot color
-function updateStatusIndicator(userInput) {
-    let indicator = document.getElementById("statusIndicator");
+// Store all response files in an array
+const responseFiles = [responses1, responses2, responses3, responses4, responses5, responses6, responses7, responses8, responses9, responses10];
 
-    if (userInput.length === 0) {
-        indicator.style.visibility = "hidden"; // Hide if empty
-        return;
-    }
-
-    let response = findBestMatch(userInput, responses) || findBestMatch(userInput, extraResponses);
-    indicator.style.visibility = "visible";
-    indicator.style.backgroundColor = response ? "green" : "red";
-}
-
-// Function to show Google-like suggestions
-function showSuggestions(userInput) {
-    let suggestionsBox = document.getElementById("suggestions");
-    suggestionsBox.innerHTML = "";
-
-    if (userInput.length === 0) {
-        suggestionsBox.style.display = "none"; // Hide suggestions if input is empty
-        return;
-    }
-
-    let matchedQuestions = Object.keys(responses)
-        .concat(Object.keys(extraResponses))
-        .filter(question => question.toLowerCase().includes(userInput.toLowerCase()))
-        .slice(0, 5); // Limit to 5 suggestions
-
-    if (matchedQuestions.length === 0) {
-        suggestionsBox.style.display = "none";
-        return;
-    }
-
-    matchedQuestions.forEach(question => {
-        let boldedPart = question.replace(new RegExp(`^(${userInput})`, "i"), "<b>$1</b>");
-        let suggestionItem = document.createElement("div");
-        suggestionItem.innerHTML = boldedPart;
-        suggestionItem.classList.add("suggestion-item");
-
-        suggestionItem.addEventListener("click", function () {
-            document.getElementById("userInput").value = question; // Autofill input box
-            sendMessage(); // Send immediately
-        });
-
-        suggestionsBox.appendChild(suggestionItem);
-    });
-
-    suggestionsBox.style.display = "block";
-}
-
-// Function to get a default unknown reply
-function getUnknownReply() {
-    let replies = [
-        "Hmm... I'm not sure about that, but I can learn!",
-        "That’s interesting! Tell me more.",
-        "I don’t know that yet, but Karthikeyan can teach me!",
-        "Good question! I’ll find out soon.",
-        "Haha, I need to learn that!"
-    ];
-    return replies[Math.floor(Math.random() * replies.length)];
-}
-
-// Function to calculate Levenshtein Distance (edit distance for fuzzy matching)
-function getEditDistance(a, b) {
-    let tmp;
-    if (a.length === 0) return b.length;
-    if (b.length === 0) return a.length;
-    if (a.length > b.length) tmp = a, a = b, b = tmp;
-
-    let row = Array(a.length + 1).fill().map((_, i) => i);
-
-    for (let i = 1; i <= b.length; i++) {
-        let prev = i;
-        for (let j = 1; j <= a.length; j++) {
-            let val = (b[i - 1] === a[j - 1]) ? row[j - 1] : Math.min(row[j - 1] + 1, prev + 1, row[j] + 1);
-            row[j - 1] = prev;
-            prev = val;
-        }
-        row[a.length] = prev;
-    }
-    return row[a.length];
-}
-
-// AI-Like Matching System: Combines Word Matching & Fuzzy Matching
-function findBestMatch(userInput, responseSet) {
-    let cleanedInput = userInput.replace(/[^\w\s]/gi, "").toLowerCase().trim();
-    if (cleanedInput.length === 0) return null;
-
-    let words = cleanedInput.split(" ");
-    let bestMatch = null;
-    let highestMatchCount = 0;
-    let lowestDistance = Infinity;
-
-    for (let key in responseSet) {
-        let cleanedKey = key.replace(/[^\w\s]/gi, "").toLowerCase();
-        let keyWords = cleanedKey.split(" ");
-
-        let matchCount = words.filter(word => keyWords.includes(word)).length;
-
-        if (matchCount > highestMatchCount) {
-            highestMatchCount = matchCount;
-            bestMatch = responseSet[key];
-        }
-
-        let distance = getEditDistance(cleanedInput, cleanedKey);
-        if (distance < Math.ceil(cleanedInput.length * 0.3) && distance < lowestDistance) {
-            lowestDistance = distance;
-            bestMatch = responseSet[key];
-        }
-    }
-
-    return bestMatch || null;
-}
-
-// Function to send a message
+// Send Message Function
 function sendMessage() {
     let inputElement = document.getElementById("userInput");
     let userInput = inputElement.value.trim();
+
+    if (userInput === "") return; // Prevent empty messages
+
     let chatbox = document.getElementById("chatbox");
-
-    if (userInput === "") return;
-
-    let response = findBestMatch(userInput, responses) || 
-                   findBestMatch(userInput, extraResponses) || 
-                   getUnknownReply();
-
     chatbox.innerHTML += `<p><b>You:</b> ${userInput}</p>`;
-    chatbox.innerHTML += `<p><b>Kutty:</b> ${response}</p>`;
+    
+    inputElement.value = ""; // Clear input
+    chatbox.scrollTop = chatbox.scrollHeight; // Auto-scroll
 
-    inputElement.value = "";
-    document.getElementById("suggestions").style.display = "none"; // Hide suggestions after sending
-    chatbox.scrollTop = chatbox.scrollHeight;
+    // Show Typing Indicator for 1 second before responding
+    let typingIndicator = document.getElementById("typingIndicator");
+    typingIndicator.style.display = "block";
+
+    setTimeout(() => {
+        typingIndicator.style.display = "none";
+        
+        // Try finding a match in all response files
+        let response = getBestResponse(userInput) || getAutoCorrectedResponse(userInput) || getUnknownReply();
+
+        chatbox.innerHTML += `<p><b>Kutty:</b> ${response}</p>`;
+        chatbox.scrollTop = chatbox.scrollHeight; // Auto-scroll
+
+        // Kutty's Voice Reply
+        speak(response);
+
+        saveChatHistory(); // Save chat to localStorage
+    }, 1000);
+}
+
+// Find Best Response from responses1 to responses10
+function getBestResponse(userInput) {
+    for (let file of responseFiles) {
+        let response = findBestMatch(userInput, file);
+        if (response) return response;
+    }
+    return null;
+}
+
+// 🎤 Voice Input (Speech-to-Text)
+document.getElementById("voiceInput").addEventListener("click", function () {
+    let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+    
+    recognition.onresult = function (event) {
+        let spokenText = event.results[0][0].transcript;
+        document.getElementById("userInput").value = spokenText;
+        sendMessage(); // Send voice input as text
+    };
+
+    recognition.start();
+});
+
+// 🔊 Kutty’s Voice Reply (Text-to-Speech)
+function speak(text) {
+    let speech = new SpeechSynthesisUtterance(text);
+    speech.lang = "en-US";
+    speech.pitch = 1;
+    speech.rate = 1;
+    speechSynthesis.speak(speech);
+}
+
+// Auto-Correct for Small Typos
+function getAutoCorrectedResponse(userInput) {
+    let correctedInput = autoCorrect(userInput);
+    return getBestResponse(correctedInput);
+}
+
+function autoCorrect(text) {
+    let commonTypos = { "helo": "hello", "wht": "what", "hw": "how", "u": "you", "thnks": "thanks", "plz": "please" };
+    return commonTypos[text.toLowerCase()] || text;
+}
+
+// 👤 User Name Recognition (Remembers Users)
+function detectUserName() {
+    let userName = localStorage.getItem("userName");
+    
+    if (!userName) {
+        userName = prompt("Hey! What's your name?");
+        if (userName) localStorage.setItem("userName", userName);
+    }
+
+    if (userName) {
+        document.getElementById("chatbox").innerHTML += `<p><b>Kutty:</b> Hi ${userName}! Nice to chat with you again.</p>`;
+    }
+}
+
+// 🌗 Dark & Light Mode Toggle
+document.getElementById("themeToggle").addEventListener("click", function () {
+    document.body.classList.toggle("dark-mode");
+
+    let currentMode = document.body.classList.contains("dark-mode") ? "dark" : "light";
+    localStorage.setItem("theme", currentMode);
+});
+
+// Load Theme Preference
+if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark-mode");
+}
+
+// 💾 Chat History (Persists Messages After Refresh)
+function saveChatHistory() {
+    localStorage.setItem("chatHistory", document.getElementById("chatbox").innerHTML);
+}
+
+function loadChatHistory() {
+    let savedChat = localStorage.getItem("chatHistory");
+    if (savedChat) document.getElementById("chatbox").innerHTML = savedChat;
 }
 
 
