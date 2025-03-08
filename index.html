@@ -23,8 +23,8 @@
                 position: absolute; right: 50px;
                 background-color: red; visibility: hidden;">
             </span>
-            <button onclick="sendMessage()">Send</button>
-            <button id="voiceInput">🎤</button>
+            <button type="button" onclick="sendMessage()">Send</button>
+            <button type="button" id="voiceInput">🎤</button>
         </div>
 
         <!-- Typing Indicator -->
@@ -38,7 +38,7 @@
             position: absolute; width: 250px;
             background: white; border: 1px solid gray;
             display: none; max-height: 150px; overflow-y: auto;
-            z-index: 10;">
+            z-index: 10; left: 10px;">
         </div>
     </div>
 
