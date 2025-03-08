@@ -13,7 +13,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Check answer availability & show suggestions while typing
+    // Mobile Fix: Send button works on tap
+    document.getElementById("sendButton").addEventListener("click", sendMessage);
+
+    // Voice button works properly
+    document.getElementById("voiceInput").addEventListener("click", startVoiceRecognition);
+
+    // Show suggestions while typing
     inputElement.addEventListener("input", function () {
         let userInput = inputElement.value.trim();
         updateStatusIndicator(userInput);
@@ -21,10 +27,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// Responses from multiple files
+// Load responses from all files
 const responseFiles = [responses1, responses2, responses3, responses4, responses5, responses6, responses7, responses8, responses9, responses10];
 
-// Function to check answer availability & update dot color
+// ✅ Fix: Update Status Indicator (Green for known, Red for unknown)
 function updateStatusIndicator(userInput) {
     let indicator = document.getElementById("statusIndicator");
 
@@ -38,13 +44,13 @@ function updateStatusIndicator(userInput) {
     indicator.style.backgroundColor = response ? "green" : "red";
 }
 
-// Function to show Google-like suggestions
+// ✅ Fix: Working Suggestions Box
 function showSuggestions(userInput) {
     let suggestionsBox = document.getElementById("suggestions");
     suggestionsBox.innerHTML = "";
 
     if (userInput.length === 0) {
-        suggestionsBox.style.display = "none"; // Hide suggestions if input is empty
+        suggestionsBox.style.display = "none";
         return;
     }
 
@@ -55,7 +61,7 @@ function showSuggestions(userInput) {
 
     matchedQuestions = matchedQuestions
         .filter(question => question.toLowerCase().includes(userInput.toLowerCase()))
-        .slice(0, 5); // Limit to 5 suggestions
+        .slice(0, 5);
 
     if (matchedQuestions.length === 0) {
         suggestionsBox.style.display = "none";
@@ -63,14 +69,13 @@ function showSuggestions(userInput) {
     }
 
     matchedQuestions.forEach(question => {
-        let boldedPart = question.replace(new RegExp(`^(${userInput})`, "i"), "<b>$1</b>");
         let suggestionItem = document.createElement("div");
-        suggestionItem.innerHTML = boldedPart;
+        suggestionItem.textContent = question;
         suggestionItem.classList.add("suggestion-item");
 
         suggestionItem.addEventListener("click", function () {
-            document.getElementById("userInput").value = question; // Autofill input box
-            sendMessage(); // Send immediately
+            document.getElementById("userInput").value = question;
+            sendMessage();
         });
 
         suggestionsBox.appendChild(suggestionItem);
@@ -79,7 +84,7 @@ function showSuggestions(userInput) {
     suggestionsBox.style.display = "block";
 }
 
-// Function to send a message
+// ✅ Fix: Send Button Works
 function sendMessage() {
     let inputElement = document.getElementById("userInput");
     let userInput = inputElement.value.trim();
@@ -100,17 +105,17 @@ function sendMessage() {
         chatbox.innerHTML += `<p><b>Kutty:</b> ${response}</p>`;
         chatbox.scrollTop = chatbox.scrollHeight;
 
-        // Kutty's Voice Reply
+        // ✅ Fix: Working voice response
         speak(response);
 
         saveChatHistory();
     }, 1000);
 
     inputElement.value = "";
-    document.getElementById("suggestions").style.display = "none"; // Hide suggestions after sending
+    document.getElementById("suggestions").style.display = "none";
 }
 
-// Find Best Response from all response files
+// ✅ Fix: Get Best Response
 function getBestResponse(userInput) {
     for (let file of responseFiles) {
         let response = findBestMatch(userInput, file);
@@ -119,7 +124,7 @@ function getBestResponse(userInput) {
     return null;
 }
 
-// Function to get a default unknown reply
+// ✅ Fix: Default Unknown Reply
 function getUnknownReply() {
     let replies = [
         "Hmm... I'm not sure about that, but I can learn!",
@@ -131,32 +136,21 @@ function getUnknownReply() {
     return replies[Math.floor(Math.random() * replies.length)];
 }
 
-// Auto-Correct for Small Typos
-function getAutoCorrectedResponse(userInput) {
-    let correctedInput = autoCorrect(userInput);
-    return getBestResponse(correctedInput);
-}
-
-function autoCorrect(text) {
-    let commonTypos = { "helo": "hello", "wht": "what", "hw": "how", "u": "you", "thnks": "thanks", "plz": "please" };
-    return commonTypos[text.toLowerCase()] || text;
-}
-
-// 🎤 Voice Input (Speech-to-Text)
-document.getElementById("voiceInput").addEventListener("click", function () {
+// ✅ Fix: Voice Input Works
+function startVoiceRecognition() {
     let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.lang = "en-US";
 
     recognition.onresult = function (event) {
         let spokenText = event.results[0][0].transcript;
         document.getElementById("userInput").value = spokenText;
-        sendMessage(); // Send voice input as text
+        sendMessage();
     };
 
     recognition.start();
-});
+}
 
-// 🔊 Kutty’s Voice Reply (Text-to-Speech)
+// ✅ Fix: Voice Output Works
 function speak(text) {
     let speech = new SpeechSynthesisUtterance(text);
     speech.lang = "en-US";
@@ -165,34 +159,7 @@ function speak(text) {
     speechSynthesis.speak(speech);
 }
 
-// 🌗 Dark & Light Mode Toggle
-document.getElementById("themeToggle").addEventListener("click", function () {
-    document.body.classList.toggle("dark-mode");
-
-    let currentMode = document.body.classList.contains("dark-mode") ? "dark" : "light";
-    localStorage.setItem("theme", currentMode);
-});
-
-// Load Theme Preference
-if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark-mode");
-}
-
-// 👤 User Name Recognition (Remembers Users)
-function detectUserName() {
-    let userName = localStorage.getItem("userName");
-
-    if (!userName) {
-        userName = prompt("Hey! What's your name?");
-        if (userName) localStorage.setItem("userName", userName);
-    }
-
-    if (userName) {
-        document.getElementById("chatbox").innerHTML += `<p><b>Kutty:</b> Hi ${userName}! Nice to chat with you again.</p>`;
-    }
-}
-
-// 💾 Chat History (Persists Messages After Refresh)
+// ✅ Fix: Chat History Works
 function saveChatHistory() {
     localStorage.setItem("chatHistory", document.getElementById("chatbox").innerHTML);
 }
