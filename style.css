@@ -4,8 +4,16 @@ body {
     font-family: Arial, sans-serif;
     color: white;
     text-align: center;
+    transition: background 0.3s ease-in-out;
 }
 
+/* Dark Mode */
+body.dark-mode {
+    background: #121212;
+    color: #f5f5f5;
+}
+
+/* Chat Container */
 .chat-container {
     width: 80%;
     max-width: 400px;
@@ -14,8 +22,10 @@ body {
     padding: 20px;
     border-radius: 10px;
     margin-top: 50px;
+    transition: background 0.3s;
 }
 
+/* Chatbox */
 #chatbox {
     height: 300px;
     overflow-y: auto;
@@ -24,14 +34,34 @@ body {
     text-align: left;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 5px;
+    font-size: 14px;
+    line-height: 1.5;
+    scrollbar-width: thin;
+    scrollbar-color: #888 #444;
 }
 
+/* Smooth scrolling */
+#chatbox::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chatbox::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+#chatbox::-webkit-scrollbar-track {
+    background: #444;
+}
+
+/* Input & Buttons */
 input {
     width: calc(100% - 70px);
     padding: 10px;
     border-radius: 5px;
     border: none;
     outline: none;
+    font-size: 14px;
 }
 
 button {
@@ -42,10 +72,31 @@ button {
     cursor: pointer;
     border-radius: 5px;
     margin-left: 5px;
+    transition: background 0.2s ease-in-out;
 }
 
 button:hover {
     background: #218838;
+}
+
+/* Voice Input & Output Buttons */
+#voiceInput, #voiceOutput {
+    background: #007bff;
+    margin-left: 5px;
+}
+
+#voiceInput:hover, #voiceOutput:hover {
+    background: #0056b3;
+}
+
+/* Theme Toggle Button */
+#themeToggle {
+    background: #ffcc00;
+    color: black;
+}
+
+#themeToggle:hover {
+    background: #e6b800;
 }
 
 /* Status Indicator (Green/Red Dot) */
@@ -74,11 +125,14 @@ button:hover {
     color: black;
     text-align: left;
     font-size: 14px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .suggestion-item {
     padding: 5px 10px;
     cursor: pointer;
+    transition: background 0.2s;
 }
 
 .suggestion-item:hover {
@@ -89,3 +143,28 @@ button:hover {
 .suggestion-item strong {
     font-weight: bold;
 }
+
+/* Typing Indicator */
+#typingIndicator {
+    font-size: 12px;
+    color: #ccc;
+    display: none;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+    .chat-container {
+        width: 90%;
+    }
+
+    input {
+        width: calc(100% - 60px);
+    }
+
+    #statusIndicator {
+        right: 45px;
+    }
+}
+
