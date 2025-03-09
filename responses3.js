@@ -97,5 +97,5 @@ const extraResponses = {
 
 // Make sure `responses3.js` can be added dynamically later
 if (typeof allResponses !== "undefined") {
-    allResponses.push(extraResponses3);
+    allResponses.push(extraResponses);
 }
