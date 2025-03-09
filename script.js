@@ -27,7 +27,13 @@ function updateStatusIndicator(userInput) {
         return;
     }
 
-    let response = findBestMatch(userInput, responses) || findBestMatch(userInput, extraResponses);
+    let response = findBestMatch(userInput, responses) ||
+                   findBestMatch(userInput, responses2) ||
+                   findBestMatch(userInput, responses3) ||
+                   findBestMatch(userInput, responses4) ||
+                   findBestMatch(userInput, responses5) ||
+                   findBestMatch(userInput, extraResponses);
+
     indicator.style.visibility = "visible";
     indicator.style.backgroundColor = response ? "green" : "red";
 }
@@ -42,8 +48,14 @@ function showSuggestions(userInput) {
         return;
     }
 
-    let matchedQuestions = Object.keys(responses)
-        .concat(Object.keys(extraResponses))
+    let allQuestions = Object.keys(responses)
+        .concat(Object.keys(responses2))
+        .concat(Object.keys(responses3))
+        .concat(Object.keys(responses4))
+        .concat(Object.keys(responses5))
+        .concat(Object.keys(extraResponses));
+
+    let matchedQuestions = allQuestions
         .filter(question => question.toLowerCase().includes(userInput.toLowerCase()))
         .slice(0, 5); // Limit to 5 suggestions
 
@@ -141,9 +153,13 @@ function sendMessage() {
 
     if (userInput === "") return;
 
-    let response = findBestMatch(userInput, responses) || 
-                   findBestMatch(userInput, extraResponses) || 
-                   getUnknownReply();
+    let response = findBestMatch(userInput, responses) ||
+                   findBestMatch(userInput, responses2) ||
+                   findBestMatch(userInput, responses3) ||
+                   findBestMatch(userInput, responses4) ||
+                   findBestMatch(userInput, responses5) ||
+                   findBestMatch(userInput, extraResponses) ||
+                   getUnknownReply(); // Default unknown response
 
     chatbox.innerHTML += `<p><b>You:</b> ${userInput}</p>`;
     chatbox.innerHTML += `<p><b>Kutty:</b> ${response}</p>`;
@@ -152,4 +168,3 @@ function sendMessage() {
     document.getElementById("suggestions").style.display = "none"; // Hide suggestions after sending
     chatbox.scrollTop = chatbox.scrollHeight;
 }
-
