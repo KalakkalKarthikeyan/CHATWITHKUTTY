@@ -1,4 +1,4 @@
-const extraResponses = {
+const responses = {
     "who made you": "Karthikeyan created me! I am his chatbot.",
     "who is karthikeyan": "Karthikeyan is my creator! He’s awesome.",
     "do you have a name": "Yes! I’m Kutty, your chat buddy.",
