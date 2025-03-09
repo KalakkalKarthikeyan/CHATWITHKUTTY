@@ -94,8 +94,3 @@ const extraResponses = {
     "what is your job": "Talking to you and answering your questions!",
     "who is your best friend": "Karthikeyan! And also you!",
 };
-
-// Make sure `responses3.js` can be added dynamically later
-if (typeof allResponses !== "undefined") {
-    allResponses.push(extraResponses);
-}
