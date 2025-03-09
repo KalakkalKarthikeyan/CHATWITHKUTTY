@@ -26,14 +26,6 @@ body {
     border-radius: 5px;
 }
 
-/* Input Box & Send Button Container */
-.input-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-/* Text Input */
 input {
     width: calc(100% - 70px);
     padding: 10px;
@@ -42,7 +34,6 @@ input {
     outline: none;
 }
 
-/* Send Button */
 button {
     padding: 10px;
     border: none;
@@ -63,7 +54,7 @@ button:hover {
     height: 10px;
     border-radius: 50%;
     position: absolute;
-    right: 65px;
+    right: 55px;
     top: 50%;
     transform: translateY(-50%);
     background-color: red;
@@ -73,9 +64,7 @@ button:hover {
 /* Suggestions Box */
 #suggestions {
     position: absolute;
-    top: 40px;
-    left: 0;
-    width: 100%;
+    width: 250px;
     background: white;
     border: 1px solid gray;
     display: none;
@@ -95,4 +84,10 @@ button:hover {
 .suggestion-item:hover {
     background: #ddd;
 }
+
+/* Bold untyped suggestion letters */
+.suggestion-item strong {
+    font-weight: bold;
+}
+
 
