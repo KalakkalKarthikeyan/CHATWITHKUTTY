@@ -27,12 +27,6 @@ function updateStatusIndicator(userInput) {
         return;
     }
 
-    // Ensure responses exist before checking them
-    if (typeof responses === "undefined" || typeof extraResponses === "undefined") {
-        indicator.style.visibility = "hidden";
-        return;
-    }
-
     let response = findBestMatch(userInput, responses) || findBestMatch(userInput, extraResponses);
     indicator.style.visibility = "visible";
     indicator.style.backgroundColor = response ? "green" : "red";
@@ -43,8 +37,8 @@ function showSuggestions(userInput) {
     let suggestionsBox = document.getElementById("suggestions");
     suggestionsBox.innerHTML = "";
 
-    if (userInput.length === 0 || typeof responses === "undefined" || typeof extraResponses === "undefined") {
-        suggestionsBox.style.display = "none"; // Hide suggestions if input is empty or responses are missing
+    if (userInput.length === 0) {
+        suggestionsBox.style.display = "none"; // Hide suggestions if input is empty
         return;
     }
 
@@ -59,8 +53,9 @@ function showSuggestions(userInput) {
     }
 
     matchedQuestions.forEach(question => {
+        let boldedPart = question.replace(new RegExp(`^(${userInput})`, "i"), "<b>$1</b>");
         let suggestionItem = document.createElement("div");
-        suggestionItem.innerHTML = `<strong>${question}</strong>`;
+        suggestionItem.innerHTML = boldedPart;
         suggestionItem.classList.add("suggestion-item");
 
         suggestionItem.addEventListener("click", function () {
@@ -88,7 +83,6 @@ function getUnknownReply() {
 
 // Function to calculate Levenshtein Distance (edit distance for fuzzy matching)
 function getEditDistance(a, b) {
-    if (!a || !b) return Infinity; // Prevent errors if input is undefined
     let tmp;
     if (a.length === 0) return b.length;
     if (b.length === 0) return a.length;
@@ -110,8 +104,6 @@ function getEditDistance(a, b) {
 
 // AI-Like Matching System: Combines Word Matching & Fuzzy Matching
 function findBestMatch(userInput, responseSet) {
-    if (typeof responseSet !== "object") return null; // Prevents errors if responseSet is undefined
-
     let cleanedInput = userInput.replace(/[^\w\s]/gi, "").toLowerCase().trim();
     if (cleanedInput.length === 0) return null;
 
@@ -149,12 +141,6 @@ function sendMessage() {
 
     if (userInput === "") return;
 
-    // Ensure responses exist before using them
-    if (typeof responses === "undefined" || typeof extraResponses === "undefined") {
-        alert("Error: Responses are not loaded.");
-        return;
-    }
-
     let response = findBestMatch(userInput, responses) || 
                    findBestMatch(userInput, extraResponses) || 
                    getUnknownReply();
@@ -166,3 +152,4 @@ function sendMessage() {
     document.getElementById("suggestions").style.display = "none"; // Hide suggestions after sending
     chatbox.scrollTop = chatbox.scrollHeight;
 }
+
