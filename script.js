@@ -73,73 +73,9 @@ function showSuggestions(userInput) {
     suggestionsBox.style.display = "block";
 }
 
-// Function to get a default unknown reply
-function getUnknownReply() {
-    let replies = [
-        "Hmm... I'm not sure about that, but I can learn!",
-        "That’s interesting! Tell me more.",
-        "I don’t know that yet, but Karthikeyan can teach me!",
-        "Good question! I’ll find out soon.",
-        "Haha, I need to learn that!"
-    ];
-    return replies[Math.floor(Math.random() * replies.length)];
-}
-
-// Function to calculate Levenshtein Distance (edit distance for fuzzy matching)
-function getEditDistance(a, b) {
-    let tmp;
-    if (a.length === 0) return b.length;
-    if (b.length === 0) return a.length;
-    if (a.length > b.length) tmp = a, a = b, b = tmp;
-
-    let row = Array(a.length + 1).fill().map((_, i) => i);
-
-    for (let i = 1; i <= b.length; i++) {
-        let prev = i;
-        for (let j = 1; j <= a.length; j++) {
-            let val = (b[i - 1] === a[j - 1]) ? row[j - 1] : Math.min(row[j - 1] + 1, prev + 1, row[j] + 1);
-            row[j - 1] = prev;
-            prev = val;
-        }
-        row[a.length] = prev;
-    }
-    return row[a.length];
-}
-
-// AI-Like Matching System: Combines Word Matching & Fuzzy Matching
-function findBestMatch(userInput, responseSet) {
-    let cleanedInput = userInput.replace(/[^\w\s]/gi, "").toLowerCase().trim();
-    if (cleanedInput.length === 0) return null;
-
-    let words = cleanedInput.split(" ");
-    let bestMatch = null;
-    let highestMatchCount = 0;
-    let lowestDistance = Infinity;
-
-    for (let key in responseSet) {
-        let cleanedKey = key.replace(/[^\w\s]/gi, "").toLowerCase();
-        let keyWords = cleanedKey.split(" ");
-
-        let matchCount = words.filter(word => keyWords.includes(word)).length;
-
-        if (matchCount > highestMatchCount) {
-            highestMatchCount = matchCount;
-            bestMatch = responseSet[key];
-        }
-
-        let distance = getEditDistance(cleanedInput, cleanedKey);
-        if (distance < Math.ceil(cleanedInput.length * 0.3) && distance < lowestDistance) {
-            lowestDistance = distance;
-            bestMatch = responseSet[key];
-        }
-    }
-
-    return bestMatch || null;
-}
-
-// Function to check if input is a math expression (at least one number + operator)
+// Function to check if input is a valid math expression
 function isMathExpression(input) {
-    return /^[\d+\-*/().\s]+$/.test(input) && /\d/.test(input) && /[\+\-\*\/]/.test(input);
+    return /^[0-9+\-*/().\s]+$/.test(input) && /\d/.test(input) && /[\+\-\*\/]/.test(input);
 }
 
 // Function to safely evaluate math expressions
@@ -152,6 +88,31 @@ function evaluateMathExpression(expression) {
     }
 }
 
+// Function to find best chatbot response using fuzzy matching
+function findBestMatch(userInput, responseSet) {
+    let cleanedInput = userInput.toLowerCase().trim();
+    if (cleanedInput.length === 0) return null;
+
+    for (let key in responseSet) {
+        if (key.toLowerCase() === cleanedInput) {
+            return responseSet[key]; // Exact match
+        }
+    }
+    return null;
+}
+
+// Function to get a random unknown reply
+function getUnknownReply() {
+    let replies = [
+        "Hmm... I'm not sure about that, but I can learn!",
+        "That’s interesting! Tell me more.",
+        "I don’t know that yet, but Karthikeyan can teach me!",
+        "Good question! I’ll find out soon.",
+        "Haha, I need to learn that!"
+    ];
+    return replies[Math.floor(Math.random() * replies.length)];
+}
+
 // Function to send a message
 function sendMessage() {
     let inputElement = document.getElementById("userInput");
@@ -160,17 +121,19 @@ function sendMessage() {
 
     if (userInput === "") return;
 
-    let response;
-
-    // Check if input is a math expression
-    if (isMathExpression(userInput)) {
-        response = evaluateMathExpression(userInput);
-    } else {
-        response = findBestMatch(userInput, responses) || 
+    let response = findBestMatch(userInput, responses) || 
                    findBestMatch(userInput, extraResponses) ||
                    findBestMatch(userInput, extraResponses4) || 
-                   findBestMatch(userInput, extraResponses5) || 
-                   getUnknownReply();
+                   findBestMatch(userInput, extraResponses5);
+
+    // If no chatbot response is found, check if it's a math question
+    if (!response && isMathExpression(userInput)) {
+        response = evaluateMathExpression(userInput);
+    }
+
+    // If still no response, give a default unknown reply
+    if (!response) {
+        response = getUnknownReply();
     }
 
     chatbox.innerHTML += `<p><b>You:</b> ${userInput}</p>`;
