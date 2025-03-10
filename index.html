@@ -7,40 +7,19 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <h1>Talk To Kutty</h1>
-
     <div class="chat-container">
-        <div id="chatbox">
-            <p><b>Kutty:</b> Hey! I'm Kutty. Ask me anything!</p>
+        <div class="chat-header">
+            <h2>Talk To Kutty</h2>
+            <div id="statusIndicator" class="indicator"></div>
         </div>
-
-        <!-- Input Box with Answer Availability Dot -->
-        <div style="position: relative; display: flex; align-items: center;">
-            <input type="text" id="userInput" placeholder="Type your message...">
-            <span id="statusIndicator" style="
-                width: 10px; height: 10px; border-radius: 50%;
-                position: absolute; right: 50px;
-                background-color: red; visibility: hidden;">
-            </span>
+        <div id="chatbox" class="chatbox"></div>
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Type a message..." autocomplete="off">
             <button onclick="sendMessage()">Send</button>
         </div>
-
-        <!-- Google-Like Suggestion Box -->
-        <div id="suggestions" style="
-            position: absolute; width: 250px;
-            background: white; border: 1px solid gray;
-            display: none; max-height: 150px; overflow-y: auto;
-            z-index: 10;">
-        </div>
+        <div id="suggestions" class="suggestions"></div>
     </div>
 
-    <script src="responses1.js"></script>
-    <script src="responses2.js"></script>
-    <script src="responses3.js"></script>
-    <script src="responses4.js"></script>
-    <script src="responses5.js"></script>
-    <script src="functions.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
