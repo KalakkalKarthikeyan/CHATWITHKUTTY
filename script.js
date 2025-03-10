@@ -27,15 +27,30 @@ function updateStatusIndicator(userInput) {
         return;
     }
 
-    let response = findBestMatch(userInput, responses) ||
-                   findBestMatch(userInput, responses2) ||
-                   findBestMatch(userInput, responses3) ||
-                   findBestMatch(userInput, responses4) ||
-                   findBestMatch(userInput, responses5) ||
-                   findBestMatch(userInput, extraResponses);
+    let response = solveMath(userInput) || 
+                   findBestMatch(userInput, responses) || 
+                   findBestMatch(userInput, extraResponses) ||
+                   findBestMatch(userInput, extraResponses) || 
+                   findBestMatch(userInput, extraResponses4) || 
+                   findBestMatch(userInput, extraResponses5);
 
     indicator.style.visibility = "visible";
     indicator.style.backgroundColor = response ? "green" : "red";
+}
+
+// Function to solve basic math expressions
+function solveMath(expression) {
+    try {
+        // Remove any unwanted characters
+        let sanitizedExpression = expression.replace(/[^0-9+\-*/().\s]/g, "");
+        if (sanitizedExpression.match(/^[0-9+\-*/().\s]+$/)) {
+            let result = eval(sanitizedExpression);
+            return `The answer is: ${result}`;
+        }
+    } catch (error) {
+        return null;
+    }
+    return null;
 }
 
 // Function to show Google-like suggestions
@@ -48,14 +63,8 @@ function showSuggestions(userInput) {
         return;
     }
 
-    let allQuestions = Object.keys(responses)
-        .concat(Object.keys(responses2))
-        .concat(Object.keys(responses3))
-        .concat(Object.keys(responses4))
-        .concat(Object.keys(responses5))
-        .concat(Object.keys(extraResponses));
-
-    let matchedQuestions = allQuestions
+    let matchedQuestions = Object.keys(responses)
+        .concat(Object.keys(extraResponses), Object.keys(extraResponses4), Object.keys(extraResponses5))
         .filter(question => question.toLowerCase().includes(userInput.toLowerCase()))
         .slice(0, 5); // Limit to 5 suggestions
 
@@ -153,13 +162,13 @@ function sendMessage() {
 
     if (userInput === "") return;
 
-    let response = findBestMatch(userInput, responses) ||
-                   findBestMatch(userInput, responses2) ||
-                   findBestMatch(userInput, responses3) ||
-                   findBestMatch(userInput, responses4) ||
-                   findBestMatch(userInput, responses5) ||
+    let response = solveMath(userInput) ||
+                   findBestMatch(userInput, responses) || 
                    findBestMatch(userInput, extraResponses) ||
-                   getUnknownReply(); // Default unknown response
+                   findBestMatch(userInput, extraResponses) || 
+                   findBestMatch(userInput, extraResponses4) || 
+                   findBestMatch(userInput, extraResponses5) || 
+                   getUnknownReply();
 
     chatbox.innerHTML += `<p><b>You:</b> ${userInput}</p>`;
     chatbox.innerHTML += `<p><b>Kutty:</b> ${response}</p>`;
