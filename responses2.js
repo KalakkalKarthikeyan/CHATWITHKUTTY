@@ -1,4 +1,4 @@
-const extraResponses = {
+const responses = {
     "how are you": "I’m just a chatbot, but I feel great!",
     "what are you doing": "Chatting with you! What about you?",
     "do you know esp32": "Yes! ESP32 is a powerful microcontroller. Karthikeyan uses it for smart projects!",
