@@ -27,30 +27,13 @@ function updateStatusIndicator(userInput) {
         return;
     }
 
-    let response = solveMath(userInput) || 
-                   findBestMatch(userInput, responses) || 
+    let response = findBestMatch(userInput, responses) || 
                    findBestMatch(userInput, extraResponses) ||
-                   findBestMatch(userInput, extraResponses) || 
                    findBestMatch(userInput, extraResponses4) || 
                    findBestMatch(userInput, extraResponses5);
 
     indicator.style.visibility = "visible";
     indicator.style.backgroundColor = response ? "green" : "red";
-}
-
-// Function to solve basic math expressions
-function solveMath(expression) {
-    try {
-        // Remove any unwanted characters
-        let sanitizedExpression = expression.replace(/[^0-9+\-*/().\s]/g, "");
-        if (sanitizedExpression.match(/^[0-9+\-*/().\s]+$/)) {
-            let result = eval(sanitizedExpression);
-            return `The answer is: ${result}`;
-        }
-    } catch (error) {
-        return null;
-    }
-    return null;
 }
 
 // Function to show Google-like suggestions
@@ -154,6 +137,21 @@ function findBestMatch(userInput, responseSet) {
     return bestMatch || null;
 }
 
+// Function to check if input is a math expression (at least one number + operator)
+function isMathExpression(input) {
+    return /^[\d+\-*/().\s]+$/.test(input) && /\d/.test(input) && /[\+\-\*\/]/.test(input);
+}
+
+// Function to safely evaluate math expressions
+function evaluateMathExpression(expression) {
+    try {
+        let result = new Function(`return (${expression})`)();
+        return `The answer is: ${result}`;
+    } catch {
+        return "Invalid math expression!";
+    }
+}
+
 // Function to send a message
 function sendMessage() {
     let inputElement = document.getElementById("userInput");
@@ -162,13 +160,18 @@ function sendMessage() {
 
     if (userInput === "") return;
 
-    let response = solveMath(userInput) ||
-                   findBestMatch(userInput, responses) || 
+    let response;
+
+    // Check if input is a math expression
+    if (isMathExpression(userInput)) {
+        response = evaluateMathExpression(userInput);
+    } else {
+        response = findBestMatch(userInput, responses) || 
                    findBestMatch(userInput, extraResponses) ||
-                   findBestMatch(userInput, extraResponses) || 
                    findBestMatch(userInput, extraResponses4) || 
                    findBestMatch(userInput, extraResponses5) || 
                    getUnknownReply();
+    }
 
     chatbox.innerHTML += `<p><b>You:</b> ${userInput}</p>`;
     chatbox.innerHTML += `<p><b>Kutty:</b> ${response}</p>`;
